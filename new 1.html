@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>3D Dental Hospital – SmileCare Dental Center</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+    }
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+    #info {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      color: rgba(230, 245, 255, 0.95);
+      background: rgba(5, 20, 35, 0.85);
+      padding: 10px 18px;
+      border-radius: 40px;
+      backdrop-filter: blur(10px);
+      border-left: 4px solid #4a9ebe;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      pointer-events: none;
+      z-index: 10;
+      max-width: calc(100% - 90px);
+    }
+    #info h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #info i {
+      color: #4a9ebe;
+      margin-right: 8px;
+    }
+    #info p {
+      margin: 3px 0 0 0;
+      font-size: 0.7rem;
+      opacity: 0.8;
+      font-weight: 300;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .controls-hint {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      color: rgba(200, 220, 240, 0.6);
+      font-size: 0.7rem;
+      background: rgba(0,0,0,0.5);
+      padding: 6px 12px;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+      z-index: 10;
+      pointer-events: none;
+    }
+    .dental-functions {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      max-width: 380px;
+      justify-content: flex-end;
+      z-index: 15;
+      pointer-events: none;
+    }
+    .function-badge {
+      background: rgba(8, 35, 55, 0.9);
+      backdrop-filter: blur(10px);
+      color: rgba(220, 240, 255, 0.9);
+      padding: 8px 14px;
+      border-radius: 40px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid rgba(74, 158, 190, 0.4);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease, background 0.2s, border-color 0.2s;
+      cursor: default;
+      pointer-events: auto;
+      white-space: nowrap;
+    }
+    .function-badge:hover {
+      transform: translateY(-3px);
+      background: rgba(15, 55, 85, 0.95);
+      border-color: #4a9ebe;
+    }
+    .function-badge i {
+      color: #4a9ebe;
+      font-size: 1rem;
+    }
+    /* Booking panel */
+    #booking-panel {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 290px;
+      background: rgba(5, 20, 35, 0.92);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 20px;
+      color: rgba(230, 245, 255, 0.95);
+      border: 1px solid rgba(74, 158, 190, 0.3);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+      z-index: 20;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      max-height: calc(100vh - 32px);
+      max-height: calc(100dvh - 32px);
+      overflow-y: auto;
+    }
+    #booking-panel h2 {
+      margin: 0 0 15px 0;
+      font-size: 1.05rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #4a9ebe;
+      padding-right: 20px;
+    }
+    #booking-panel h2 i {
+      font-size: 1.15rem;
+    }
+    .booking-field {
+      margin-bottom: 12px;
+    }
+    .booking-field label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+      opacity: 0.7;
+      letter-spacing: 0.5px;
+    }
+    .booking-field input,
+    .booking-field select {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid rgba(74, 158, 190, 0.3);
+      background: rgba(0, 10, 20, 0.6);
+      color: white;
+      font-size: 0.8rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .booking-field select {
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a9ebe' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 14px;
+    }
+    .booking-field input:focus,
+    .booking-field select:focus {
+      border-color: #4a9ebe;
+    }
+    .booking-field select option {
+      background: #0a1a2a;
+      color: white;
+    }
+    .booking-btn {
+      width: 100%;
+      padding: 11px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #2a7a9a, #4a9ebe);
+      color: white;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+    }
+    .booking-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(74, 158, 190, 0.4);
+    }
+    .booking-btn:active {
+      transform: translateY(0);
+    }
+    #booking-message {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      text-align: center;
+      color: #6ad4a0;
+      min-height: 18px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      line-height: 1.4;
+    }
+    #booking-message.show {
+      opacity: 1;
+    }
+    .booking-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(5, 20, 35, 0.9);
+      border: 1px solid rgba(74, 158, 190, 0.4);
+      color: #4a9ebe;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 25;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+      transition: transform 0.2s;
+    }
+    .booking-toggle:active {
+      transform: scale(0.92);
+    }
+    .panel-hidden {
+      transform: translateX(120%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .booking-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(74, 158, 190, 0.15);
+      border: none;
+      color: rgba(230,245,255,0.7);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .booking-close:hover {
+      color: #4a9ebe;
+      background: rgba(74, 158, 190, 0.25);
+    }
+
+    /* ---------- RESPONSIVE BREAKPOINTS ---------- */
+    
+    /* Tablet */
+    @media (max-width: 1024px) {
+      #info h1 { font-size: 1.05rem; }
+      #info p { font-size: 0.65rem; }
+      .dental-functions { max-width: 320px; }
+      .function-badge { padding: 7px 12px; font-size: 0.72rem; }
+    }
+
+    /* Small tablet / large phone */
+    @media (max-width: 820px) {
+      #info { padding: 8px 14px; top: 12px; left: 12px; max-width: calc(100% - 72px); }
+      #info h1 { font-size: 0.95rem; }
+      #info p { font-size: 0.62rem; }
+      .controls-hint { display: none; }
+      .dental-functions {
+        bottom: 12px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+        justify-content: center;
+        gap: 6px;
+      }
+      .function-badge { padding: 6px 10px; font-size: 0.68rem; gap: 5px; }
+      .function-badge i { font-size: 0.85rem; }
+      #booking-panel {
+        width: 270px;
+        padding: 16px;
+      }
+      .booking-toggle {
+        display: flex;
+      }
+      #booking-panel.panel-hidden-mobile {
+        transform: translateX(120%);
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+
+    /* Phone */
+    @media (max-width: 600px) {
+      #info { padding: 7px 12px; top: 10px; left: 10px; max-width: calc(100% - 66px); }
+      #info h1 { font-size: 0.85rem; }
+      #info p { font-size: 0.58rem; }
+      #info i { font-size: 0.85rem; margin-right: 5px; }
+      .booking-toggle {
+        top: 10px;
+        right: 10px;
+        width: 42px;
+        height: 42px;
+        font-size: 1.05rem;
+      }
+      .dental-functions {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        gap: 5px;
+      }
+      .function-badge {
+        padding: 5px 9px;
+        font-size: 0.6rem;
+        gap: 4px;
+      }
+      .function-badge i { font-size: 0.75rem; }
+      #booking-panel {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        transform: translate(-50%, -50%);
+        width: calc(100% - 32px);
+        max-width: 340px;
+        max-height: 85vh;
+        max-height: 85dvh;
+        padding: 18px;
+        z-index: 30;
+      }
+      #booking-panel.panel-hidden-mobile {
+        transform: translate(-50%, -50%) scale(0.92);
+        opacity: 0;
+        pointer-events: none;
+      }
+      #booking-panel h2 { font-size: 0.95rem; margin-bottom: 12px; }
+      .booking-field label { font-size: 0.62rem; }
+      .booking-field input,
+      .booking-field select { font-size: 0.78rem; padding: 8px 10px; }
+      .booking-btn { font-size: 0.82rem; padding: 10px; }
+      #booking-message { font-size: 0.7rem; }
+    }
+
+    /* Very small phones */
+    @media (max-width: 380px) {
+      #info h1 { font-size: 0.78rem; }
+      #info p { display: none; }
+      .function-badge { padding: 4px 8px; font-size: 0.55rem; }
+      .function-badge i { font-size: 0.7rem; }
+    }
+
+    /* Landscape phone */
+    @media (max-height: 500px) and (orientation: landscape) {
+      #info { top: 8px; left: 8px; padding: 5px 10px; }
+      #info h1 { font-size: 0.8rem; }
+      #info p { display: none; }
+      .dental-functions {
+        bottom: 8px;
+        right: 8px;
+        left: auto;
+        max-width: 55%;
+        gap: 4px;
+      }
+      .function-badge { padding: 3px 7px; font-size: 0.55rem; }
+      .function-badge i { font-size: 0.65rem; }
+      .booking-toggle { top: 8px; right: 8px; width: 36px; height: 36px; font-size: 0.9rem; }
+      #booking-panel {
+        width: 260px;
+        padding: 12px;
+        max-height: calc(100vh - 16px);
+        max-height: calc(100dvh - 16px);
+      }
+      #booking-panel h2 { font-size: 0.85rem; margin-bottom: 8px; }
+      .booking-field { margin-bottom: 7px; }
+      .booking-field label { font-size: 0.58rem; }
+      .booking-field input,
+      .booking-field select { padding: 6px 8px; font-size: 0.72rem; }
+      .booking-btn { padding: 8px; font-size: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <h1><i class="fas fa-tooth"></i> SmileCare Dental Center</h1>
+    <p>Advanced 3D Dental Hospital • 24/7 Emergency Dental Care • 20+ Specialists</p>
+  </div>
+
+  <div class="controls-hint">
+    <i class="fas fa-mouse"></i> Drag to rotate • Scroll to zoom
+  </div>
+
+  <div class="dental-functions">
+    <div class="function-badge"><i class="fas fa-tooth"></i> General Dentistry</div>
+    <div class="function-badge"><i class="fas fa-syringe"></i> Oral Surgery</div>
+    <div class="function-badge"><i class="fas fa-x-ray"></i> Digital X-Ray</div>
+    <div class="function-badge"><i class="fas fa-smile"></i> Orthodontics</div>
+    <div class="function-badge"><i class="fas fa-child"></i> Pediatric Dental</div>
+    <div class="function-badge"><i class="fas fa-teeth"></i> Implantology</div>
+    <div class="function-badge"><i class="fas fa-brush"></i> Hygiene & Cleaning</div>
+    <div class="function-badge"><i class="fas fa-crown"></i> Cosmetic Dentistry</div>
+  </div>
+
+  <!-- Booking Toggle Button (mobile) -->
+  <button class="booking-toggle" id="bookingToggle" aria-label="Open booking panel">
+    <i class="fas fa-calendar-check"></i>
+  </button>
+
+  <!-- Booking Panel -->
+  <div id="booking-panel">
+    <button class="booking-close" id="bookingClose" aria-label="Close booking panel">
+      <i class="fas fa-times"></i>
+    </button>
+    <h2><i class="fas fa-calendar-check"></i> Book an Appointment</h2>
+    <form id="bookingForm">
+      <div class="booking-field">
+        <label for="patientName">Full Name</label>
+        <input type="text" id="patientName" placeholder="John Doe" required>
+      </div>
+      <div class="booking-field">
+        <label for="patientPhone">Phone Number</label>
+        <input type="tel" id="patientPhone" placeholder="+1 (555) 123-4567" required>
+      </div>
+      <div class="booking-field">
+        <label for="department">Department</label>
+        <select id="department" required>
+          <option value="">Select a department</option>
+          <option value="general">General Dentistry</option>
+          <option value="surgery">Oral Surgery</option>
+          <option value="ortho">Orthodontics</option>
+          <option value="pediatric">Pediatric Dental</option>
+          <option value="implant">Implantology</option>
+          <option value="cosmetic">Cosmetic Dentistry</option>
+          <option value="hygiene">Hygiene & Cleaning</option>
+          <option value="xray">Digital X-Ray</option>
+        </select>
+      </div>
+      <div class="booking-field">
+        <label for="appointmentDate">Preferred Date</label>
+        <input type="date" id="appointmentDate" required>
+      </div>
+      <div class="booking-field">
+        <label for="appointmentTime">Preferred Time</label>
+        <input type="time" id="appointmentTime" required>
+      </div>
+      <button type="submit" class="booking-btn">
+        <i class="fas fa-check-circle"></i> Confirm Booking
+      </button>
+      <div id="booking-message"></div>
+    </form>
+  </div>
+
+  <!-- Three.js and OrbitControls from CDN -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // --- Setup Scene (Dim, realistic evening/night look) ---
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050a12);
+    scene.fog = new THREE.FogExp2(0x050a12, 0.012);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera.position.set(22, 12, 35);
+    camera.lookAt(0, 5, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.55;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    document.body.appendChild(renderer.domElement);
+
+    // --- Controls ---
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.6;
+    controls.enableZoom = true;
+    controls.target.set(0, 5, 0);
+    controls.maxPolarAngle = Math.PI / 2.3;
+    controls.minDistance = 12;
+    controls.maxDistance = 70;
+    // Touch-friendly
+    controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+
+    // --- Lighting (Dim, realistic) ---
+    const ambientLight = new THREE.AmbientLight(0x1a1a2e, 0.4);
+    scene.add(ambientLight);
+
+    const moonLight = new THREE.DirectionalLight(0x8a9cc0, 0.6);
+    moonLight.position.set(-20, 30, -15);
+    moonLight.castShadow = true;
+    moonLight.receiveShadow = true;
+    moonLight.shadow.mapSize.width = 2048;
+    moonLight.shadow.mapSize.height = 2048;
+    moonLight.shadow.camera.left = -35;
+    moonLight.shadow.camera.right = 35;
+    moonLight.shadow.camera.top = 35;
+    moonLight.shadow.camera.bottom = -35;
+    moonLight.shadow.camera.near = 1;
+    moonLight.shadow.camera.far = 80;
+    moonLight.shadow.bias = -0.0005;
+    scene.add(moonLight);
+
+    const interiorFill = new THREE.PointLight(0xffcc88, 0.4);
+    interiorFill.position.set(0, 4, 15);
+    scene.add(interiorFill);
+
+    const accentLight1 = new THREE.PointLight(0x4a9ebe, 0.8);
+    accentLight1.position.set(12, 8, 12);
+    scene.add(accentLight1);
+    const accentLight2 = new THREE.PointLight(0x6aaeee, 0.6);
+    accentLight2.position.set(-12, 6, -10);
+    scene.add(accentLight2);
+
+    const groundLight1 = new THREE.PointLight(0xcc8844, 0.3, 20);
+    groundLight1.position.set(-12, 2, 15);
+    scene.add(groundLight1);
+    const groundLight2 = new THREE.PointLight(0xcc8844, 0.3, 20);
+    groundLight2.position.set(12, 2, 15);
+    scene.add(groundLight2);
+
+    // --- Ground Plane ---
+    const groundGeometry = new THREE.CircleGeometry(50, 64);
+    const groundMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x0a1218, 
+      roughness: 0.95, 
+      metalness: 0.0 
+    });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -0.01;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const gridHelper = new THREE.GridHelper(100, 40, 0x2a4a6a, 0x0a1a2a);
+    gridHelper.position.y = 0;
+    gridHelper.material.opacity = 0.15;
+    gridHelper.material.transparent = true;
+    scene.add(gridHelper);
+
+    // --- Helper function: window with emissive glow ---
+    function createWindow(width, height, color = 0xccddff, intensity = 0.8) {
+      const geometry = new THREE.BoxGeometry(width, height, 0.08);
+      const material = new THREE.MeshStandardMaterial({ 
+        color: color,
+        emissive: new THREE.Color(color),
+        emissiveIntensity: intensity,
+        roughness: 0.4,
+        metalness: 0.1
+      });
+      return new THREE.Mesh(geometry, material);
+    }
+
+    // --- Main Dental Hospital Building ---
+    const hospitalGroup = new THREE.Group();
+
+    const baseGeo = new THREE.BoxGeometry(16, 10, 12);
+    const baseMat = new THREE.MeshStandardMaterial({ 
+      color: 0x9aa8b8, 
+      roughness: 0.75, 
+      metalness: 0.05,
+      emissive: new THREE.Color(0x050810),
+      emissiveIntensity: 0.3
+    });
+    const base = new THREE.Mesh(baseGeo, baseMat);
+    base.castShadow = true;
+    base.receiveShadow = true;
+    base.position.y = 5;
+    hospitalGroup.add(base);
+
+    // Base trim
+    const baseTrimGeo = new THREE.BoxGeometry(16.15, 0.6, 12.15);
+    const baseTrimMat = new THREE.MeshStandardMaterial({ 
+      color: 0x2a5a6a, 
+      emissive: new THREE.Color(0x0a2a3a), 
+      emissiveIntensity: 0.6,
+      roughness: 0.4,
+      metalness: 0.3
+    });
+    const baseTrim = new THREE.Mesh(baseTrimGeo, baseTrimMat);
+    baseTrim.castShadow = true;
+    baseTrim.receiveShadow = true;
+    baseTrim.position.y = 0.3;
+    hospitalGroup.add(baseTrim);
+
+    // Entrance canopy
+    const canopyGeo = new THREE.BoxGeometry(8, 0.3, 3.5);
+    const canopyMat = new THREE.MeshStandardMaterial({ 
+      color: 0x3a7a8a, 
+      emissive: new THREE.Color(0x1a4a5a), 
+      emissiveIntensity: 0.7,
+      roughness: 0.3,
+      metalness: 0.4
+    });
+    const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+    canopy.castShadow = true;
+    canopy.receiveShadow = true;
+    canopy.position.set(0, 3.5, 8.0);
+    hospitalGroup.add(canopy);
+
+    // Entrance pillars
+    const pillarGeo = new THREE.CylinderGeometry(0.22, 0.22, 3.5, 8);
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x778899, roughness: 0.4, metalness: 0.6 });
+    const pillar1 = new THREE.Mesh(pillarGeo, pillarMat);
+    pillar1.castShadow = true;
+    pillar1.receiveShadow = true;
+    pillar1.position.set(-3.5, 1.75, 7.6);
+    hospitalGroup.add(pillar1);
+    const pillar2 = pillar1.clone();
+    pillar2.position.set(3.5, 1.75, 7.6);
+    hospitalGroup.add(pillar2);
+
+    // Windows – front facade
+    for (let i = -4; i <= 4; i+=2) {
+      for (let j = 1.5; j <= 8; j+=2.2) {
+        if (Math.abs(i) < 3.5 && j < 4) continue;
+        const intensity = 0.5 + Math.random() * 0.5;
+        const win = createWindow(1.1, 1.6, 0xccddff, intensity);
+        win.position.set(i, j, 6.02);
+        hospitalGroup.add(win);
+      }
+    }
+
+    // Windows – side facade (left)
+    for (let i = -4; i <= 4; i+=2) {
+      for (let j = 1.5; j <= 8; j+=2.2) {
+        const intensity = 0.4 + Math.random() * 0.5;
+        const win = createWindow(1.1, 1.6, 0xccddff, intensity);
+        win.position.set(-8.02, j, i);
+        win.rotation.y = Math.PI / 2;
+        hospitalGroup.add(win);
+      }
+    }
+
+    // Windows – side facade (right)
+    for (let i = -4; i <= 4; i+=2) {
+      for (let j = 1.5; j <= 8; j+=2.2) {
+        const intensity = 0.4 + Math.random() * 0.5;
+        const win = createWindow(1.1, 1.6, 0xccddff, intensity);
+        win.position.set(8.02, j, i);
+        win.rotation.y = -Math.PI / 2;
+        hospitalGroup.add(win);
+      }
+    }
+
+    // Windows – back facade
+    for (let i = -3; i <= 3; i+=2) {
+      for (let j = 1.5; j <= 7; j+=2.2) {
+        const intensity = 0.2 + Math.random() * 0.4;
+        const win = createWindow(1.1, 1.6, 0x88aadd, intensity);
+        win.position.set(i, j, -6.02);
+        hospitalGroup.add(win);
+      }
+    }
+
+    // Roof base
+    const roofBaseGeo = new THREE.BoxGeometry(12, 0.5, 10);
+    const roofBaseMat = new THREE.MeshStandardMaterial({ color: 0x6a7a8a, roughness: 0.7 });
+    const roofBase = new THREE.Mesh(roofBaseGeo, roofBaseMat);
+    roofBase.castShadow = true;
+    roofBase.receiveShadow = true;
+    roofBase.position.y = 10.25;
+    hospitalGroup.add(roofBase);
+
+    // --- Giant Tooth Sign on Roof ---
+    const toothGroup = new THREE.Group();
+    
+    const crownGeo = new THREE.SphereGeometry(1.2, 16, 12);
+    const crownMat = new THREE.MeshStandardMaterial({ 
+      color: 0xf0f8ff, 
+      emissive: new THREE.Color(0x224466), 
+      emissiveIntensity: 0.15,
+      roughness: 0.2,
+      metalness: 0.1
+    });
+    const crown = new THREE.Mesh(crownGeo, crownMat);
+    crown.scale.set(1.15, 0.9, 0.85);
+    crown.position.y = 1.0;
+    crown.castShadow = true;
+    crown.receiveShadow = true;
+    toothGroup.add(crown);
+    
+    const rootGeo = new THREE.CylinderGeometry(0.28, 0.38, 1.0, 8);
+    const rootMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.5 });
+    const root1 = new THREE.Mesh(rootGeo, rootMat);
+    root1.position.set(-0.5, 0.2, 0);
+    root1.castShadow = true;
+    root1.receiveShadow = true;
+    toothGroup.add(root1);
+    const root2 = root1.clone();
+    root2.position.set(0.5, 0.2, 0);
+    toothGroup.add(root2);
+    
+    const crossMat = new THREE.MeshStandardMaterial({ 
+      color: 0x4a9ebe, 
+      emissive: new THREE.Color(0x2a7a9a), 
+      emissiveIntensity: 1.0 
+    });
+    const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.7, 0.18), crossMat);
+    crossV.position.set(0, 1.0, 0.65);
+    toothGroup.add(crossV);
+    const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.18, 0.18), crossMat);
+    crossH.position.set(0, 1.0, 0.65);
+    toothGroup.add(crossH);
+    
+    toothGroup.position.set(0, 10.8, 0);
+    toothGroup.scale.set(0.9, 0.9, 0.9);
+    hospitalGroup.add(toothGroup);
+
+    // Smile arc above entrance
+    const smileGeo = new THREE.TorusGeometry(2.5, 0.12, 12, 32, Math.PI);
+    const smileMat = new THREE.MeshStandardMaterial({ 
+      color: 0xdd8866, 
+      emissive: new THREE.Color(0x884422), 
+      emissiveIntensity: 0.6,
+      roughness: 0.4
+    });
+    const smile = new THREE.Mesh(smileGeo, smileMat);
+    smile.rotation.z = Math.PI;
+    smile.rotation.x = 0.15;
+    smile.position.set(0, 5.8, 7.0);
+    hospitalGroup.add(smile);
+
+    // Emergency sign
+    const emergencySignGeo = new THREE.BoxGeometry(2.8, 0.7, 0.15);
+    const emergencyMat = new THREE.MeshStandardMaterial({ 
+      color: 0x4a9ebe, 
+      emissive: new THREE.Color(0x2a7a9a), 
+      emissiveIntensity: 1.0 
+    });
+    const emergencySign = new THREE.Mesh(emergencySignGeo, emergencyMat);
+    emergencySign.position.set(0, 2.3, 6.2);
+    hospitalGroup.add(emergencySign);
+
+    const lightBarGeo = new THREE.BoxGeometry(1.8, 0.12, 0.25);
+    const lightBarMat = new THREE.MeshStandardMaterial({ 
+      color: 0xffaa33, 
+      emissive: new THREE.Color(0xaa6600), 
+      emissiveIntensity: 0.9 
+    });
+    const lightBar = new THREE.Mesh(lightBarGeo, lightBarMat);
+    lightBar.position.set(0, 0.9, 7.0);
+    hospitalGroup.add(lightBar);
+
+    // Left wing
+    const wingLeftGeo = new THREE.BoxGeometry(5, 6, 8);
+    const wingLeftMat = new THREE.MeshStandardMaterial({ color: 0x8a98a8, roughness: 0.7 });
+    const wingLeft = new THREE.Mesh(wingLeftGeo, wingLeftMat);
+    wingLeft.castShadow = true;
+    wingLeft.receiveShadow = true;
+    wingLeft.position.set(-10.5, 3, -1);
+    hospitalGroup.add(wingLeft);
+
+    for (let i = -2; i <= 2; i+=2) {
+      for (let j = 1.5; j <= 4.5; j+=2) {
+        const intensity = 0.3 + Math.random() * 0.6;
+        const win = createWindow(0.9, 1.4, 0xccddff, intensity);
+        win.position.set(-13.02, j, i);
+        win.rotation.y = Math.PI / 2;
+        hospitalGroup.add(win);
+      }
+    }
+
+    // Right wing
+    const wingRightGeo = new THREE.BoxGeometry(5, 8, 6);
+    const wingRightMat = new THREE.MeshStandardMaterial({ color: 0x8a98a8, roughness: 0.7 });
+    const wingRight = new THREE.Mesh(wingRightGeo, wingRightMat);
+    wingRight.castShadow = true;
+    wingRight.receiveShadow = true;
+    wingRight.position.set(10.5, 4, 2);
+    hospitalGroup.add(wingRight);
+
+    for (let i = -1; i <= 1; i+=2) {
+      for (let j = 1.5; j <= 6; j+=2) {
+        const intensity = 0.3 + Math.random() * 0.6;
+        const win = createWindow(0.9, 1.4, 0xccddff, intensity);
+        win.position.set(13.02, j, i);
+        win.rotation.y = -Math.PI / 2;
+        hospitalGroup.add(win);
+      }
+    }
+
+    scene.add(hospitalGroup);
+
+    // --- 3D HOSPITAL NAME ON BUILDING FACADE ---
+    function createTextPlane(text, color, bgColor, width, height, fontSize) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1024;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, bgColor);
+      gradient.addColorStop(1, '#0a1a2a');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.font = `bold ${fontSize}px 'Inter', Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 30;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      ctx.fillStyle = color;
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+      
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.9;
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+      ctx.globalAlpha = 1.0;
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      texture.encoding = THREE.sRGBEncoding;
+      
+      const material = new THREE.MeshStandardMaterial({ 
+        map: texture, 
+        transparent: true,
+        emissive: new THREE.Color(color),
+        emissiveIntensity: 0.6,
+        emissiveMap: texture,
+        side: THREE.DoubleSide
+      });
+      
+      const geometry = new THREE.PlaneGeometry(width, height);
+      return new THREE.Mesh(geometry, material);
+    }
+
+    // Main name sign on front facade
+    const nameSign = createTextPlane('SmileCare', '#4a9ebe', '#0a1a2a', 12, 3, 160);
+    nameSign.position.set(0, 9.2, 6.1);
+    hospitalGroup.add(nameSign);
+
+    // Subtitle sign
+    const subtitleSign = createTextPlane('Dental Center', '#aaddff', '#0a1a2a', 8, 1.5, 80);
+    subtitleSign.position.set(0, 7.8, 6.1);
+    hospitalGroup.add(subtitleSign);
+
+    // Name on left wing
+    const wingNameSign = createTextPlane('SmileCare', '#4a9ebe', '#0a1a2a', 6, 1.5, 140);
+    wingNameSign.position.set(-13.03, 5.2, 0);
+    wingNameSign.rotation.y = Math.PI / 2;
+    hospitalGroup.add(wingNameSign);
+
+    // Name on right wing
+    const wingNameSignRight = createTextPlane('SmileCare', '#4a9ebe', '#0a1a2a', 6, 1.5, 140);
+    wingNameSignRight.position.set(13.03, 6.2, 0);
+    wingNameSignRight.rotation.y = -Math.PI / 2;
+    hospitalGroup.add(wingNameSignRight);
+
+    // --- Trees ---
+    function createTree(x, z, scale = 1) {
+      const treeGroup = new THREE.Group();
+      
+      const trunkGeo = new THREE.CylinderGeometry(0.35 * scale, 0.55 * scale, 2 * scale, 6);
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3a2a, roughness: 0.95 });
+      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+      trunk.castShadow = true;
+      trunk.receiveShadow = true;
+      trunk.position.y = 1 * scale;
+      treeGroup.add(trunk);
+
+      const leafMat = new THREE.MeshStandardMaterial({ 
+        color: 0x1a4a2a, 
+        roughness: 0.85,
+        emissive: new THREE.Color(0x051a0a),
+        emissiveIntensity: 0.2
+      });
+      
+      const leaf1 = new THREE.Mesh(new THREE.ConeGeometry(1.3 * scale, 1.8 * scale, 8), leafMat);
+      leaf1.castShadow = true;
+      leaf1.receiveShadow = true;
+      leaf1.position.y = 2.2 * scale;
+      treeGroup.add(leaf1);
+
+      const leaf2 = new THREE.Mesh(new THREE.ConeGeometry(1.0 * scale, 1.5 * scale, 8), leafMat);
+      leaf2.castShadow = true;
+      leaf2.receiveShadow = true;
+      leaf2.position.y = 3.2 * scale;
+      treeGroup.add(leaf2);
+
+      const leaf3 = new THREE.Mesh(new THREE.ConeGeometry(0.7 * scale, 1.2 * scale, 8), leafMat);
+      leaf3.castShadow = true;
+      leaf3.receiveShadow = true;
+      leaf3.position.y = 4.0 * scale;
+      treeGroup.add(leaf3);
+
+      treeGroup.position.set(x, 0, z);
+      return treeGroup;
+    }
+
+    const treePositions = [
+      [-18, -12], [18, -12], [-20, 10], [20, 10], [-15, 18], [15, 18],
+      [-25, -5], [25, -5], [-22, -18], [22, -18], [-12, -20], [12, -20],
+      [-28, 8], [28, 8], [-8, 22], [8, 22]
+    ];
+    treePositions.forEach(([x, z]) => {
+      const tree = createTree(x, z, 0.9 + Math.random() * 0.3);
+      scene.add(tree);
+    });
+
+    // Hedges
+    const hedgeMat = new THREE.MeshStandardMaterial({ color: 0x1a3a2a, roughness: 0.9 });
+    for (let i = -6; i <= 6; i+=2) {
+      const hedge = new THREE.Mesh(new THREE.SphereGeometry(0.8, 6), hedgeMat);
+      hedge.position.set(i, 0.5, 12);
+      hedge.scale.set(1.2, 0.6, 1.2);
+      hedge.castShadow = true;
+      hedge.receiveShadow = true;
+      scene.add(hedge);
+    }
+
+    // Dental vans
+    function createDentalVan(x, z, rotation = 0) {
+      const group = new THREE.Group();
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.5, metalness: 0.3 });
+      const stripeMat = new THREE.MeshStandardMaterial({ color: 0x2a6a8a, emissive: new THREE.Color(0x0a2a3a), emissiveIntensity: 0.5 });
+      
+      const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.6, 0.9), bodyMat);
+      body.position.y = 0.4;
+      body.castShadow = true;
+      body.receiveShadow = true;
+      group.add(body);
+      
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.2, 0.95), stripeMat);
+      stripe.position.y = 0.5;
+      stripe.castShadow = true;
+      stripe.receiveShadow = true;
+      group.add(stripe);
+      
+      const light = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.12, 0.2), new THREE.MeshStandardMaterial({ color: 0x4a9ebe, emissive: 0x2a7a9a, emissiveIntensity: 1.0 }));
+      light.position.set(0.7, 0.82, 0);
+      group.add(light);
+      
+      group.position.set(x, 0.2, z);
+      group.rotation.y = rotation;
+      return group;
+    }
+
+    scene.add(createDentalVan(-4, 11, 0.3));
+    scene.add(createDentalVan(5, 11.5, -0.2));
+
+    // Street lamps
+    function createStreetLamp(x, z) {
+      const group = new THREE.Group();
+      
+      const poleGeo = new THREE.CylinderGeometry(0.08, 0.1, 3.5);
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.6, metalness: 0.8 });
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.y = 1.75;
+      pole.castShadow = true;
+      pole.receiveShadow = true;
+      group.add(pole);
+      
+      const armGeo = new THREE.BoxGeometry(0.8, 0.08, 0.08);
+      const arm = new THREE.Mesh(armGeo, poleMat);
+      arm.position.set(0.4, 3.4, 0);
+      arm.castShadow = true;
+      arm.receiveShadow = true;
+      group.add(arm);
+      
+      const lampGeo = new THREE.SphereGeometry(0.2, 8, 6);
+      const lampMat = new THREE.MeshStandardMaterial({ color: 0xffdd99, emissive: new THREE.Color(0xcc8844), emissiveIntensity: 1.2 });
+      const lamp = new THREE.Mesh(lampGeo, lampMat);
+      lamp.position.set(0.8, 3.3, 0);
+      lamp.castShadow = true;
+      lamp.receiveShadow = true;
+      group.add(lamp);
+      
+      group.position.set(x, 0, z);
+      return group;
+    }
+
+    scene.add(createStreetLamp(-8, 18));
+    scene.add(createStreetLamp(8, 18));
+    scene.add(createStreetLamp(-15, 5));
+    scene.add(createStreetLamp(15, 5));
+
+    // Floating particles
+    const particleCount = 400;
+    const particlesGeo = new THREE.BufferGeometry();
+    const particlesPos = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      particlesPos[i] = (Math.random() - 0.5) * 140;
+      particlesPos[i+1] = Math.random() * 40;
+      particlesPos[i+2] = (Math.random() - 0.5) * 140;
+    }
+    particlesGeo.setAttribute('position', new THREE.BufferAttribute(particlesPos, 3));
+    const particlesMat = new THREE.PointsMaterial({
+      color: 0xaaddff,
+      size: 0.1,
+      transparent: true,
+      opacity: 0.25,
+      blending: THREE.AdditiveBlending
+    });
+    const particles = new THREE.Points(particlesGeo, particlesMat);
+    scene.add(particles);
+
+    // --- Animation Loop ---
+    function animate() {
+      const elapsedTime = performance.now() * 0.001;
+
+      controls.update();
+      particles.rotation.y += 0.00005;
+
+      if (emergencySign.material) {
+        const intensity = 0.8 + Math.sin(elapsedTime * 6) * 0.4;
+        emergencySign.material.emissiveIntensity = intensity;
+      }
+      if (lightBar.material) {
+        lightBar.material.emissiveIntensity = 0.6 + Math.sin(elapsedTime * 8) * 0.3;
+      }
+      if (toothGroup) {
+        toothGroup.rotation.y = Math.sin(elapsedTime * 0.4) * 0.08;
+      }
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // --- Handle Window Resize (Responsive) ---
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      // Adjust camera distance for small screens for better view
+      if (w < 700) {
+        if (controls.maxDistance < 60) controls.maxDistance = 60;
+        // Slightly pulled-back view for mobile
+        if (camera.position.length() > 40) {
+          camera.position.setLength(35);
+        }
+      }
+    }
+    // Initial responsive adjustment
+    onWindowResize();
+
+    // --- Booking Form Logic ---
+    const bookingForm = document.getElementById('bookingForm');
+    const bookingMessage = document.getElementById('booking-message');
+    const bookingPanel = document.getElementById('booking-panel');
+    const bookingToggle = document.getElementById('bookingToggle');
+    const bookingClose = document.getElementById('bookingClose');
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('appointmentDate').setAttribute('min', today);
+
+    // On mobile, panel starts hidden
+    function checkMobilePanel() {
+      if (window.innerWidth <= 820) {
+        bookingPanel.classList.add('panel-hidden-mobile');
+        bookingToggle.style.display = 'flex';
+      } else {
+        bookingPanel.classList.remove('panel-hidden-mobile');
+        bookingToggle.style.display = 'none';
+      }
+    }
+    checkMobilePanel();
+    window.addEventListener('resize', checkMobilePanel);
+
+    bookingForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('patientName').value.trim();
+      const phone = document.getElementById('patientPhone').value.trim();
+      const department = document.getElementById('department').value;
+      const date = document.getElementById('appointmentDate').value;
+      const time = document.getElementById('appointmentTime').value;
+      
+      if (!name || !phone || !department || !date || !time) {
+        bookingMessage.textContent = 'Please fill in all fields.';
+        bookingMessage.style.color = '#ff8888';
+        bookingMessage.classList.add('show');
+        return;
+      }
+      
+      const deptNames = {
+        general: 'General Dentistry',
+        surgery: 'Oral Surgery',
+        ortho: 'Orthodontics',
+        pediatric: 'Pediatric Dental',
+        implant: 'Implantology',
+        cosmetic: 'Cosmetic Dentistry',
+        hygiene: 'Hygiene & Cleaning',
+        xray: 'Digital X-Ray'
+      };
+      
+      bookingMessage.textContent = `✅ Appointment confirmed for ${name} in ${deptNames[department]} on ${date} at ${time}. We'll call ${phone} shortly.`;
+      bookingMessage.style.color = '#6ad4a0';
+      bookingMessage.classList.add('show');
+      
+      setTimeout(() => {
+        bookingForm.reset();
+        bookingMessage.classList.remove('show');
+      }, 5000);
+    });
+
+    // Mobile toggle
+    bookingToggle.addEventListener('click', () => {
+      bookingPanel.classList.toggle('panel-hidden-mobile');
+    });
+
+    bookingClose.addEventListener('click', () => {
+      if (window.innerWidth <= 820) {
+        bookingPanel.classList.add('panel-hidden-mobile');
+      } else {
+        bookingPanel.classList.add('panel-hidden');
+        // Show toggle on desktop after close
+        bookingToggle.style.display = 'flex';
+      }
+    });
+
+    // If on desktop and panel is closed, show toggle to reopen
+    bookingToggle.addEventListener('click', () => {
+      if (window.innerWidth > 820) {
+        bookingPanel.classList.remove('panel-hidden');
+        bookingToggle.style.display = 'none';
+      } else {
+        bookingPanel.classList.toggle('panel-hidden-mobile');
+      }
+    });
+
+    // Start auto-rotate smoothly
+    setTimeout(() => {
+      controls.autoRotate = true;
+    }, 1000);
+  </script>
+</body>
+</html>
